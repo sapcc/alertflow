@@ -34,36 +34,49 @@ func main() {
 	// set configs //
 	/////////////////
 	// TODO: use automatic config parsing
-	endpoint := os.Getenv("BILLING_ENDPOINT")
-	if endpoint == "" {
+	billing_endpoint := os.Getenv("BILLING_ENDPOINT")
+	if billing_endpoint == "" {
 		log.Fatal("Missing environment variable BILLING_ENDPOINT")
 	}
-	password := os.Getenv("BILLING_AUTH")
-	if password == "" {
+	billing_secret := os.Getenv("BILLING_AUTH")
+	if billing_secret == "" {
 		log.Fatal("Missing environment variable BILLING_AUTH")
 	}
 
+	smtpHost := os.Getenv("SMTP_HOST")
+	if smtpHost == "" {
+		log.Fatal("Missing environment variable SMTP_HOST")
+	}
+	smtpUsername := os.Getenv("SMTP_USER")
+	if smtpUsername == "" {
+		log.Fatal("Missing environment variable SMTP_USER")
+	}
+	smtpSecret := os.Getenv("SMTP_SECRET")
+	if smtpSecret == "" {
+		log.Fatal("Missing environment variable SMTP_SECRET")
+	}
 	////////////////////
 	//  setup clients //
 	////////////////////
-	billingClient, err := clients.NewBillingClient(os.Getenv("BILLING_ENDPOINT"), os.Getenv("BILLING_AUTH"))
+	billingClient, err := clients.NewBillingClient(billing_endpoint, billing_secret)
 	if err != nil {
 		log.Fatal("Failed to create billing client: %s", err)
 	}
 
 	projectClient := clients.NewProjectClient(billingClient)
+	smtpClient := clients.NewSmtpClient(smtpHost, smtpUsername, smtpSecret)
 
 	////////////////////////////////////////
 	// setup handlers and starting server //
 	////////////////////////////////////////
-	alertHandler := handlers.AlertWebHookHandler(projectClient)
+	alertHandler := handlers.AlertWebHookHandler(projectClient, smtpClient)
 
 	router := http.NewServeMux()
 	router.Handle("/alerts", alertHandler)
 
 	server := &http.Server{
-      Addr:    ":8080",
-      Handler: server.WrapHandler(router),
+		Addr:    ":8080",
+		Handler: server.WrapHandler(router),
   }
 	log.Fatal(server.ListenAndServe())
 }
