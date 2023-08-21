@@ -48,6 +48,10 @@ func (msg *WebHookMsg) CheckValid() error {
 	return nil
 }
 
+func (msg *WebHookMsg) GetReceiver() string {
+	return msg.Receiver
+}
+
 func (alert *Alert) CheckValid() error {
 	if alert.Status == "" {
 		return fmt.Errorf("Status value missing")
@@ -80,7 +84,7 @@ func (alert *Alert) GetFingerprint() string {
 	return alert.Fingerprint
 }
 
-func AlertWebHookHandler(projectClient *clients.ProjectClient) http.HandlerFunc {
+func AlertWebHookHandler(projectClient *clients.ProjectClient, smtpClient *clients.SmtpClient) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			logger.Printf("error: invalid request method received")
@@ -110,6 +114,8 @@ func AlertWebHookHandler(projectClient *clients.ProjectClient) http.HandlerFunc 
 			return
 		}
 
+		logger.Printf("Info: alert received from receiver: %s", whMsg.GetReceiver())
+
 		for _, alert := range whMsg.Alerts {
 			err = alert.CheckValid()
 			if err != nil {
@@ -117,7 +123,6 @@ func AlertWebHookHandler(projectClient *clients.ProjectClient) http.HandlerFunc 
 				continue
 			}
 
-			// valid alert -> fetch alert attributes
 			// TODO: optimize to fetch from cache
 			projectId := alert.GetProjectId()
 			fingerprint := alert.GetFingerprint()
@@ -130,10 +135,22 @@ func AlertWebHookHandler(projectClient *clients.ProjectClient) http.HandlerFunc 
 			}
 
 			// fetch contact infos
-			PrimaryContactEmail := project.ResponsiblePrimaryContactEmail
-			OperatorEmail := project.ResponsibleOperatorEmail
+			// TODO: check if exists
+			primaryContactEmail := project.ResponsiblePrimaryContactEmail
+			operatorEmail := project.ResponsibleOperatorEmail
 
-			logger.Printf("sending email to primary contact:%s, operator:%s for alert, fingerprint: %s, project_id: %s\n", PrimaryContactEmail, OperatorEmail, fingerprint, projectId)
+			// send email
+			logger.Printf("sending email to primary contact:%s, operator:%s for alert, fingerprint: %s, project_id: %s\n", primaryContactEmail, operatorEmail, fingerprint, projectId)
+			to := []string{
+				primaryContactEmail,
+				operatorEmail,
+			}
+			err = smtpClient.SendEmail("do-not-reply@global.cloud.sap", to)
+			if err != nil {
+				logger.Printf("error: failed to send email, err: %+v", err)
+				continue
+			}
+			logger.Printf("email sent to primary contact:%s, operator:%s for alert, fingerprint: %s\n", primaryContactEmail, operatorEmail, fingerprint)
 		}
 
 		w.WriteHeader(http.StatusOK)
