@@ -52,6 +52,10 @@ func (msg *WebHookMsg) GetReceiver() string {
 	return msg.Receiver
 }
 
+func (msg *WebHookMsg) GetAlertName() string {
+	return msg.GroupLabels["alertname"]
+}
+
 func (alert *Alert) CheckValid() error {
 	if alert.Status == "" {
 		return fmt.Errorf("Status value missing")
@@ -145,7 +149,11 @@ func AlertWebHookHandler(projectClient *clients.ProjectClient, smtpClient *clien
 				primaryContactEmail,
 				operatorEmail,
 			}
-			err = smtpClient.SendEmail("do-not-reply@global.cloud.sap", to)
+			err = smtpClient.SendEmail("do-not-reply@global.cloud.sap", to, &clients.MailInfo{
+				AlertName: whMsg.GetAlertName(),
+				Projectid: projectId,
+				Description: "",
+			})
 			if err != nil {
 				logger.Printf("error: failed to send email, err: %+v", err)
 				continue
