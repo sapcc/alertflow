@@ -61,13 +61,17 @@ func (alert *Alert) CheckValid() error {
 		return fmt.Errorf("Status value missing")
 	}
 
-	projectId := alert.GetProjectId()
-	if projectId == "" {
-		return fmt.Errorf("label project_id is missing or invalid")
-	}
-
 	// TODO: any more?
 	return nil
+}
+
+func (alert *Alert) CheckMailEnabled() bool {
+	projectId := alert.GetProjectId()
+	if projectId == "" {
+		return false
+	}
+
+	return alert.IsMailNotificationEnabled()
 }
 
 func (alert *Alert) GetProjectId() string {
@@ -82,6 +86,20 @@ func (alert *Alert) GetProjectId() string {
 	}
 
 	return ""
+}
+
+func (alert *Alert) IsMailNotificationEnabled() bool {
+	if alert.Labels == nil || len(alert.Labels) == 0 {
+		return false
+	}
+
+	for k, _ := range alert.Labels {
+		if k == "mail_notification_enabled" && alert.Labels[k] == "true" {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (alert *Alert) GetFingerprint() string {
@@ -123,13 +141,19 @@ func AlertWebHookHandler(projectClient *clients.ProjectClient, smtpClient *clien
 		for _, alert := range whMsg.Alerts {
 			err = alert.CheckValid()
 			if err != nil {
-				logger.Printf("error: no email sent. invalid alert found, err: %s", err)
+				logger.Printf("warning: no email sent. invalid alert found, err: %s", err)
+				continue
+			}
+
+			fingerprint := alert.GetFingerprint()
+			mailEnabled := alert.CheckMailEnabled()
+			if !mailEnabled {
+				logger.Printf("warning: no email sent. alert, fingerprint:%s, is not mail enabled [project_id, mail_notification_enabled='true'] are required", fingerprint)
 				continue
 			}
 
 			// TODO: optimize to fetch from cache
 			projectId := alert.GetProjectId()
-			fingerprint := alert.GetFingerprint()
 
 			// get project
 			project, err := projectClient.GetProject(projectId)

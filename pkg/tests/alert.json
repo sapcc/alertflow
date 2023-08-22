@@ -10,7 +10,8 @@
         "job": "http_checks",
         "monitor": "master",
         "severity": "critical",
-				"project_id": "7e64871a09b84358b6b3fd6ac3655f1d"
+				"project_id": "7e64871a09b84358b6b3fd6ac3655f1d",
+        "mail_notification_enabled": "false"
       },
       "annotations": {
         "description": "Instance has been down for over 5m. Job: http_checks",
