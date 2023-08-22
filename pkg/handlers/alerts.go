@@ -23,12 +23,12 @@ type WebHookMsg struct {
 
 // Alert is a single alert.
 type Alert struct {
-	Status      string            `json:"status"`
-	Labels      map[string]string `json:"labels"`
-	Annotations map[string]string `json:"annotations"`
-	StartsAt    string            `json:"startsAt,omitempty"`
-	EndsAt      string            `json:"EndsAt,omitempty"`
-	Fingerprint string            `json:"fingerprint"`
+	Status      string                 `json:"status"`
+	Labels      map[string]interface{} `json:"labels"`
+	Annotations map[string]string      `json:"annotations"`
+	StartsAt    string                 `json:"startsAt,omitempty"`
+	EndsAt      string                 `json:"EndsAt,omitempty"`
+	Fingerprint string                 `json:"fingerprint"`
 }
 
 func (msg *WebHookMsg) CheckValid() error {
@@ -81,7 +81,10 @@ func (alert *Alert) GetProjectId() string {
 
 	for k, _ := range alert.Labels {
 		if k == "project_id" {
-			return alert.Labels[k]
+			str, ok := alert.Labels[k].(string)
+			if ok {
+				return str
+			}
 		}
 	}
 
@@ -94,8 +97,11 @@ func (alert *Alert) IsMailNotificationEnabled() bool {
 	}
 
 	for k, _ := range alert.Labels {
-		if k == "mail_notification_enabled" && alert.Labels[k] == "true" {
-			return true
+		if k == "mail_notification_enabled" {
+			b, ok := alert.Labels[k].(bool)
+			if ok {
+				return b
+			}
 		}
 	}
 

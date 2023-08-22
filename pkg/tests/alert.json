@@ -11,7 +11,7 @@
         "monitor": "master",
         "severity": "critical",
 				"project_id": "7e64871a09b84358b6b3fd6ac3655f1d",
-        "mail_notification_enabled": "false"
+        "mail_notification_enabled": true
       },
       "annotations": {
         "description": "Instance has been down for over 5m. Job: http_checks",
