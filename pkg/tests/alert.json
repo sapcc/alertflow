@@ -1,0 +1,42 @@
+{
+  "receiver": "elastic",
+  "status": "firing",
+  "alerts": [
+    {
+      "status": "firing",
+      "labels": {
+        "alertname": "ProbeFailure",
+        "instance": "https://server.example.org",
+        "job": "http_checks",
+        "monitor": "master",
+        "severity": "critical",
+				"project_id": "7e64871a09b84358b6b3fd6ac3655f1d"
+      },
+      "annotations": {
+        "description": "Instance has been down for over 5m. Job: http_checks",
+        "summary": "BlackBox Probe Failure"
+      },
+      "startsAt": "2023-02-06T13:08:45.828Z",
+      "endsAt": "0001-01-01T00:00:00Z",
+      "fingerprint": "1a30ba71cca2921f"
+    }
+  ],
+  "groupLabels": {
+    "alertname": "test_alert"
+  },
+  "commonLabels": {
+    "alertname": "ProbeFailure",
+    "instance": "instance1",
+    "job": "http_checks",
+    "monitor": "master",
+    "severity": "critical"
+  },
+  "commonAnnotations": {
+    "description": "Instance has been down for over 5m. Job: http_checks",
+    "summary": "BlackBox Probe Failure"
+  },
+  "externalURL": "http://test.org:9093",
+  "version": "4",
+  "groupKey": "{}/{severity=\"critical\"}:{alertname=\"test_alert\"}",
+  "truncatedAlerts": 0
+}
