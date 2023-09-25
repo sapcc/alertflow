@@ -9,7 +9,7 @@ type ProjectClient struct {
 	billingClient *gophercloud.ServiceClient
 }
 
-func NewProjectClient(billingClient *gophercloud.ServiceClient) (*ProjectClient) {
+func NewProjectClient(billingClient *gophercloud.ServiceClient) *ProjectClient {
 	return &ProjectClient{
 		billingClient: billingClient,
 	}

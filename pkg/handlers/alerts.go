@@ -1,10 +1,10 @@
 package handlers
 
 import (
-	"fmt"
-	"net/http"
-	"io/ioutil"
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"net/http"
 
 	"github.com/sapcc/alertflow/pkg/clients"
 )
@@ -79,7 +79,7 @@ func (alert *Alert) GetProjectId() string {
 		return ""
 	}
 
-	for k, _ := range alert.Labels {
+	for k := range alert.Labels {
 		if k == "project_id" {
 			str, ok := alert.Labels[k].(string)
 			if ok {
@@ -96,7 +96,7 @@ func (alert *Alert) IsMailNotificationEnabled() bool {
 		return false
 	}
 
-	for k, _ := range alert.Labels {
+	for k := range alert.Labels {
 		if k == "mail_notification_enabled" {
 			b, ok := alert.Labels[k].(bool)
 			if ok {
@@ -180,8 +180,8 @@ func AlertWebHookHandler(projectClient *clients.ProjectClient, smtpClient *clien
 				operatorEmail,
 			}
 			err = smtpClient.SendEmail("do-not-reply@global.cloud.sap", to, &clients.MailInfo{
-				AlertName: whMsg.GetAlertName(),
-				Projectid: projectId,
+				AlertName:   whMsg.GetAlertName(),
+				Projectid:   projectId,
 				Description: "",
 			})
 			if err != nil {

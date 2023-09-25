@@ -20,13 +20,13 @@
 package main
 
 import (
-	"net/http"
 	"log"
+	"net/http"
 	"os"
 
-	"github.com/sapcc/alertflow/pkg/server"
-	"github.com/sapcc/alertflow/pkg/handlers"
 	"github.com/sapcc/alertflow/pkg/clients"
+	"github.com/sapcc/alertflow/pkg/handlers"
+	"github.com/sapcc/alertflow/pkg/server"
 )
 
 func main() {
@@ -77,6 +77,6 @@ func main() {
 	server := &http.Server{
 		Addr:    ":8080",
 		Handler: server.WrapHandler(router),
-  }
+	}
 	log.Fatal(server.ListenAndServe())
 }
