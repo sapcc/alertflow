@@ -1,6 +1,5 @@
 main
 alertflow
-Dockerfile
 pkg/tests/alertflow
 pkg/tests/project.json
 pkg/tests/server.sh
